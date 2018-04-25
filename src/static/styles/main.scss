@@ -1,0 +1,335 @@
+// can add Boostrap overrides, additional Sass/CSS below...
+
+*{
+  box-sizing: border-box;
+}
+
+$blue: #008AB3;
+
+html,
+body,
+#main,
+.app-wrapper{
+  height: 100%;
+  margin: 0;
+}
+
+body{
+  font-family: 'Lato', sans-serif;
+  color: #4A4A4A;
+}
+
+textarea:focus,
+input:focus,
+select:focus,
+button:focus,
+button:active{
+  outline: none;
+}
+
+.app-wrapper{
+
+  .header{
+    padding: 15px;
+    height: 112px;
+    box-sizing: border-box;
+    background: $blue;
+    color: #fff;
+
+    display: flex;
+    justify-content: space-between;
+
+    h1{
+      margin-top: 0;
+      margin-bottom: 5px;
+    }
+
+    .header--right{
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .header--title{
+      width: 500px;
+    }
+    #project-title{
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5em;
+      font-weight: 100;
+      border-bottom: 1px solid white;
+      padding: 5px;
+      width: 100%;
+
+      &::placeholder{
+        color: white;
+      }
+    }
+
+    .btn.icon-btn{
+      background: none;
+      border-radius: 5px;
+      border: none;
+      font-size: 18px;
+      color: white;
+      padding: 5px;
+      cursor: pointer;
+    }
+
+    .header--add-concept{
+      width: 250px;
+      display: flex;
+      
+      input{
+        background: transparent;
+        border: none;
+        color: white;
+        font-weight: 100;
+        border-bottom: 1px solid white;
+        width: 100%;
+        font-size: 16px;
+        padding: 5px;
+
+        &::placeholder{
+          color: white;
+        }
+      }
+    }
+
+
+    .header--utility{
+      justify-content: flex-end;
+      display: flex;
+
+      .header--utility--menu{
+        margin-left: 15px;
+        position: relative;
+        
+        .header--utility--menu--list--wrapper{
+          display: none;
+
+          position: absolute;
+          width: 300px;
+          padding-top: 20px;
+          z-index: 9999;
+          right: 0;
+          top: 20px;
+        }
+        .header--utility--menu--list{
+          margin: 0;
+          background: white;
+          color: #4A4A4A;
+          list-style: none;
+          padding: 0;
+          box-shadow:0px 0px 10px 1px #4a4a4a;
+
+          > li{
+            padding: 15px;  
+            cursor: pointer;
+
+            &.file-input{
+              position: relative;
+
+             input{
+               position: absolute;
+               top: 0;
+               bottom: 0;
+               left: 0;
+               right: 0;
+               opacity: 0;
+               cursor: pointer;
+             }
+            }
+            &:hover{
+              background: #e0e0e0;
+            }
+          }
+        }
+
+        &:hover{
+          .header--utility--menu--list--wrapper{
+            display: block;
+          }
+        }
+      }
+    }
+
+    .header--inner{
+      display: flex;
+      justify-content: space-between;
+
+      > *:not(:last-child) {
+        margin-right: 45px;
+      }
+
+      .header--actions{
+        display: flex;
+      }
+    }
+  }
+
+  .board{
+    flex: 1;
+    background-size: 20px 20px;
+    background-image: linear-gradient(to right, #F5F5F5 1px, transparent 1px), linear-gradient(to bottom, #F5F5F5 1px, transparent 1px);
+
+    > svg {
+      height: 100%;
+      width: 100%;
+    }
+
+    .reference-line{
+      stroke: #000;
+      stroke-width: 1px;
+      fill: transparent;
+    }
+  }
+}
+
+
+$input-background: #BDBDBD;
+
+.dropdown{
+  width: 100px;
+  overflow: hidden;
+
+  select{
+    background: transparent;
+    border: none;
+    width: 110px;
+    font-family: 'Lato';
+    font-size: 14px;
+    color: #7A7A7A;
+  }
+}
+
+.concept{
+
+  box-sizing: content-box;
+  border-radius: 15px;
+  overflow: hidden;
+
+  i {
+    cursor: pointer;
+  }
+
+  .concept--remove{
+    float: right;
+    visibility: hidden;
+  }
+
+  .concept--name{ 
+    fill: #fff;
+  }
+
+  .concept--header{
+    padding: 0 15px;
+    color: #fff;
+    line-height: 40px;
+    background: $blue;
+
+    &:hover{
+      .concept--remove{
+        visibility: visible; 
+      }
+    }
+    
+  }
+
+  .concept--field{
+    line-height: 30px;
+    background-color: #eee;
+    font-size: 14px;
+    padding: 0 10px 0 0;
+    display: flex;
+    justify-content: space-between;
+
+    .concept--field--name{
+      flex: 1;
+    }
+
+    .concept--field--type-selector{
+      display: flex;
+    }
+
+    .concept--field--type{
+      font-size: 14px;
+      color: #7A7A7A;
+      width: 108px;
+      display: flex;
+      
+      > div:first-child{
+        flex: 1;
+      }
+
+    }
+
+    .concept--field--remove{
+      float: left;
+      color: #7A7A7A;
+      padding: 0 5px;
+    }
+    
+    .concept--field--remove,
+    .reference-icon{
+      visibility: hidden;
+    }
+
+    .reference-icon:last-child{
+      margin-left: 5px;
+    }
+
+    &:hover{
+      .concept--field--remove,
+      .reference-icon{
+        visibility: visible;
+      }
+    }
+  }
+
+  .concept--field:nth-child(even){
+    background: #E0E0E0;
+  }
+
+  .concept--new-field{
+    background: $input-background;
+    padding: 5px 15px;
+
+    input {
+      border: none;
+      height: 30px;
+      padding: 5px;
+      font-family: 'Lato';
+      font-size: 14px; 
+      background: $input-background;
+      width: 100%;
+    }
+  }
+}
+
+.board.create-reference{
+
+  *{
+    -webkit-user-select: none; /* Safari */        
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
+  }
+  .concept:hover{
+    border: 3px solid yellow;
+    margin-left: -3px;
+    margin-top: -3px;
+    //transform: translate3d(-3px, -3px, 0);
+
+    .concept--field{
+      &:hover{
+        .reference-icon{
+          // Always hide when referencing
+          visibility: hidden;
+        }
+      }
+    }
+  }
+}
