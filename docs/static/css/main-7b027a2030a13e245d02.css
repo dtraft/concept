@@ -1,0 +1,244 @@
+* {
+  box-sizing: border-box; }
+
+html,
+body,
+#main,
+.app-wrapper {
+  height: 100%;
+  margin: 0; }
+
+body {
+  font-family: 'Lato', sans-serif;
+  color: #4A4A4A; }
+
+textarea:focus,
+input:focus,
+select:focus,
+button:focus,
+button:active {
+  outline: none; }
+
+.app-wrapper .header {
+  padding: 15px;
+  height: 112px;
+  box-sizing: border-box;
+  background: #008AB3;
+  color: #fff;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: justify;
+      justify-content: space-between; }
+  .app-wrapper .header h1 {
+    margin-top: 0;
+    margin-bottom: 5px; }
+  .app-wrapper .header .header--right {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: column;
+        flex-direction: column;
+    -ms-flex-pack: justify;
+        justify-content: space-between; }
+  .app-wrapper .header .header--title {
+    width: 500px; }
+  .app-wrapper .header #project-title {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    font-weight: 100;
+    border-bottom: 1px solid white;
+    padding: 5px;
+    width: 100%; }
+    .app-wrapper .header #project-title::-webkit-input-placeholder {
+      color: white; }
+    .app-wrapper .header #project-title:-ms-input-placeholder {
+      color: white; }
+    .app-wrapper .header #project-title::placeholder {
+      color: white; }
+  .app-wrapper .header .btn.icon-btn {
+    background: none;
+    border-radius: 5px;
+    border: none;
+    font-size: 18px;
+    color: white;
+    padding: 5px;
+    cursor: pointer; }
+  .app-wrapper .header .header--add-concept {
+    width: 250px;
+    display: -ms-flexbox;
+    display: flex; }
+    .app-wrapper .header .header--add-concept input {
+      background: transparent;
+      border: none;
+      color: white;
+      font-weight: 100;
+      border-bottom: 1px solid white;
+      width: 100%;
+      font-size: 16px;
+      padding: 5px; }
+      .app-wrapper .header .header--add-concept input::-webkit-input-placeholder {
+        color: white; }
+      .app-wrapper .header .header--add-concept input:-ms-input-placeholder {
+        color: white; }
+      .app-wrapper .header .header--add-concept input::placeholder {
+        color: white; }
+  .app-wrapper .header .header--utility {
+    -ms-flex-pack: end;
+        justify-content: flex-end;
+    display: -ms-flexbox;
+    display: flex; }
+    .app-wrapper .header .header--utility .header--utility--menu {
+      margin-left: 15px;
+      position: relative; }
+      .app-wrapper .header .header--utility .header--utility--menu .header--utility--menu--list--wrapper {
+        display: none;
+        position: absolute;
+        width: 300px;
+        padding-top: 20px;
+        z-index: 9999;
+        right: 0;
+        top: 20px; }
+      .app-wrapper .header .header--utility .header--utility--menu .header--utility--menu--list {
+        margin: 0;
+        background: white;
+        color: #4A4A4A;
+        list-style: none;
+        padding: 0;
+        box-shadow: 0px 0px 10px 1px #4a4a4a; }
+        .app-wrapper .header .header--utility .header--utility--menu .header--utility--menu--list > li {
+          padding: 15px;
+          cursor: pointer; }
+          .app-wrapper .header .header--utility .header--utility--menu .header--utility--menu--list > li.file-input {
+            position: relative; }
+            .app-wrapper .header .header--utility .header--utility--menu .header--utility--menu--list > li.file-input input {
+              position: absolute;
+              top: 0;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              opacity: 0;
+              cursor: pointer; }
+          .app-wrapper .header .header--utility .header--utility--menu .header--utility--menu--list > li:hover {
+            background: #e0e0e0; }
+      .app-wrapper .header .header--utility .header--utility--menu:hover .header--utility--menu--list--wrapper {
+        display: block; }
+  .app-wrapper .header .header--inner {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-pack: justify;
+        justify-content: space-between; }
+    .app-wrapper .header .header--inner > *:not(:last-child) {
+      margin-right: 45px; }
+    .app-wrapper .header .header--inner .header--actions {
+      display: -ms-flexbox;
+      display: flex; }
+
+.app-wrapper .board {
+  -ms-flex: 1;
+      flex: 1;
+  background-size: 20px 20px;
+  background-image: linear-gradient(to right, #F5F5F5 1px, transparent 1px), linear-gradient(to bottom, #F5F5F5 1px, transparent 1px); }
+  .app-wrapper .board > svg {
+    height: 100%;
+    width: 100%; }
+  .app-wrapper .board .reference-line {
+    stroke: #000;
+    stroke-width: 1px;
+    fill: transparent; }
+
+.dropdown {
+  width: 100px;
+  overflow: hidden; }
+  .dropdown select {
+    background: transparent;
+    border: none;
+    width: 110px;
+    font-family: 'Lato';
+    font-size: 14px;
+    color: #7A7A7A; }
+
+.concept {
+  box-sizing: content-box;
+  border-radius: 15px;
+  overflow: hidden; }
+  .concept i {
+    cursor: pointer; }
+  .concept .concept--remove {
+    float: right;
+    visibility: hidden; }
+  .concept .concept--name {
+    fill: #fff; }
+  .concept .concept--header {
+    padding: 0 15px;
+    color: #fff;
+    line-height: 40px;
+    background: #008AB3; }
+    .concept .concept--header:hover .concept--remove {
+      visibility: visible; }
+  .concept .concept--field {
+    line-height: 30px;
+    background-color: #eee;
+    font-size: 14px;
+    padding: 0 10px 0 0;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-pack: justify;
+        justify-content: space-between; }
+    .concept .concept--field .concept--field--name {
+      -ms-flex: 1;
+          flex: 1; }
+    .concept .concept--field .concept--field--type-selector {
+      display: -ms-flexbox;
+      display: flex; }
+    .concept .concept--field .concept--field--type {
+      font-size: 14px;
+      color: #7A7A7A;
+      width: 108px;
+      display: -ms-flexbox;
+      display: flex; }
+      .concept .concept--field .concept--field--type > div:first-child {
+        -ms-flex: 1;
+            flex: 1; }
+    .concept .concept--field .concept--field--remove {
+      float: left;
+      color: #7A7A7A;
+      padding: 0 5px; }
+    .concept .concept--field .concept--field--remove,
+    .concept .concept--field .reference-icon {
+      visibility: hidden; }
+    .concept .concept--field .reference-icon:last-child {
+      margin-left: 5px; }
+    .concept .concept--field:hover .concept--field--remove,
+    .concept .concept--field:hover .reference-icon {
+      visibility: visible; }
+  .concept .concept--field:nth-child(even) {
+    background: #E0E0E0; }
+  .concept .concept--new-field {
+    background: #BDBDBD;
+    padding: 5px 15px; }
+    .concept .concept--new-field input {
+      border: none;
+      height: 30px;
+      padding: 5px;
+      font-family: 'Lato';
+      font-size: 14px;
+      background: #BDBDBD;
+      width: 100%; }
+
+.board.create-reference * {
+  -webkit-user-select: none;
+  /* Safari */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* IE10+/Edge */
+  user-select: none;
+  /* Standard */ }
+
+.board.create-reference .concept:hover {
+  border: 3px solid yellow;
+  margin-left: -3px;
+  margin-top: -3px; }
+  .board.create-reference .concept:hover .concept--field:hover .reference-icon {
+    visibility: hidden; }
