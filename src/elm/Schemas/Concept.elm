@@ -51,15 +51,15 @@ createConcept name id =
     }
 
 
-createConcept2 : String -> Int -> Concept
-createConcept2 name id =
+createConcept2 : String -> Int -> ( Int, Int ) -> Concept
+createConcept2 name id ( x, y ) =
     { id = id
     , name = name
-    , position = Position 500 250
+    , position = Position x y
     , fields =
         [ Field "Test #1" StringField
         , Field "Test #2" IntField
-        , Field "Test #3" (RefField 1 ManyToMany)
+        , Field "Test #3" StringField
         ]
     , newField = ""
     }

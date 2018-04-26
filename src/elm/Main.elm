@@ -26,7 +26,7 @@ import Store
 main : Program Never Model Msg
 main =
     Html.program
-        { init = init
+        { init = initTest
         , view = view
         , update = update
         , subscriptions = subscriptions
@@ -58,6 +58,22 @@ init =
             }
     in
         ( nextModel, Cmd.none )
+
+
+initTest : ( Model, Cmd Msg )
+initTest =
+    let
+        ( model, cmd ) =
+            init
+    in
+        ( { model
+            | concepts =
+                Dict.singleton 1 (createConcept2 "Test 1" 1 ( 100, 100 ))
+                    |> Dict.insert 2 (createConcept2 "Test 2" 2 ( 700, 100 ))
+            , scale = 1
+          }
+        , cmd
+        )
 
 
 type MouseInteraction
@@ -220,8 +236,8 @@ referenceUpdate msg ({ mouseInteraction, concepts, scale } as model) =
                 nextReference =
                     { reference
                         | position =
-                            { x = round ((toFloat position.x) / scale)
-                            , y = round ((toFloat position.y) / scale + (112 * scale))
+                            { x = round ((toFloat position.x) / scale - 1)
+                            , y = round ((toFloat position.y) / scale - 1)
                             }
                     }
             in
@@ -234,8 +250,8 @@ referenceUpdate msg ({ mouseInteraction, concepts, scale } as model) =
                         nextReference =
                             { reference
                                 | position =
-                                    { x = round ((toFloat position.x) / scale)
-                                    , y = round ((toFloat position.y) / scale + (112 * scale))
+                                    { x = round ((toFloat (position.x - 1)) / scale)
+                                    , y = round ((toFloat (position.y - 1)) / scale - (((1 - scale) * 112) / scale))
                                     }
                             }
                     in
@@ -400,7 +416,6 @@ view model =
                         ]
                     ]
                 ]
-            , div [ class "spacer" ] []
             , div
                 [ classList
                     [ ( "board", True )
