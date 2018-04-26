@@ -46,11 +46,7 @@ createConcept name id =
     { id = id
     , name = name
     , position = Position 100 100
-    , fields =
-        [ Field "a_really_long_field_name_that_will_overflow" StringField
-        , Field "Test #2" StringField
-        , Field "Test #3" IntField
-        ]
+    , fields = []
     , newField = ""
     }
 
