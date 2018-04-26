@@ -332,10 +332,30 @@ viewField setField onReferenceStart removeField ({ name, fieldType } as field) =
                                     ]
                                     [ text "String" ]
                                 , Html.option
+                                    [ Html.value (fieldTypeToString BooleanField)
+                                    , Html.selected (fieldType == BooleanField)
+                                    ]
+                                    [ text "Boolean" ]
+                                , Html.option
                                     [ Html.value (fieldTypeToString IntField)
                                     , Html.selected (fieldType == IntField)
                                     ]
                                     [ text "Integer" ]
+                                , Html.option
+                                    [ Html.value (fieldTypeToString FloatField)
+                                    , Html.selected (fieldType == FloatField)
+                                    ]
+                                    [ text "Float" ]
+                                , Html.option
+                                    [ Html.value (fieldTypeToString DecimalField)
+                                    , Html.selected (fieldType == DecimalField)
+                                    ]
+                                    [ text "Decimal" ]
+                                , Html.option
+                                    [ Html.value (fieldTypeToString JSONField)
+                                    , Html.selected (fieldType == JSONField)
+                                    ]
+                                    [ text "JSON" ]
                                 ]
                             ]
                         , Html.i
@@ -349,7 +369,7 @@ viewField setField onReferenceStart removeField ({ name, fieldType } as field) =
             [ Html.class "concept--field" ]
             [ Html.div
                 [ Html.class "concept--field--name" ]
-                [ Html.text name
+                [ Html.span [] [ Html.text name ]
                 , Html.i
                     [ Html.class "concept--field--remove ion-close-round"
                     , Html.onClick removeField

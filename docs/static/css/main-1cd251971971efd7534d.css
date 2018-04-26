@@ -186,6 +186,7 @@ button:active {
       visibility: visible; }
   .concept .concept--field {
     line-height: 30px;
+    height: 30px;
     background-color: #eee;
     font-size: 14px;
     padding: 0 10px 0 0;
@@ -193,9 +194,12 @@ button:active {
     display: flex;
     -ms-flex-pack: justify;
         justify-content: space-between; }
-    .concept .concept--field .concept--field--name {
-      -ms-flex: 1;
-          flex: 1; }
+    .concept .concept--field .concept--field--name > span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 124px;
+      float: right; }
     .concept .concept--field .concept--field--type-selector {
       display: -ms-flexbox;
       display: flex; }

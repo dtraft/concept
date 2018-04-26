@@ -28,6 +28,10 @@ type alias Field =
 type FieldType
     = StringField
     | IntField
+    | FloatField
+    | DecimalField
+    | BooleanField
+    | JSONField
     | RefField Int RefType
 
 
@@ -43,7 +47,7 @@ createConcept name id =
     , name = name
     , position = Position 100 100
     , fields =
-        [ Field "Test #1" StringField
+        [ Field "a_really_long_field_name_that_will_overflow" StringField
         , Field "Test #2" StringField
         , Field "Test #3" IntField
         ]
@@ -159,6 +163,18 @@ fieldTypeToString fieldType =
         IntField ->
             "int"
 
+        FloatField ->
+            "float"
+
+        DecimalField ->
+            "decimal"
+
+        BooleanField ->
+            "boolean"
+
+        JSONField ->
+            "json"
+
         RefField _ _ ->
             "ref"
 
@@ -184,6 +200,18 @@ stringToFieldType input =
 
         "int" ->
             IntField
+
+        "float" ->
+            FloatField
+
+        "decimal" ->
+            DecimalField
+
+        "boolean" ->
+            BooleanField
+
+        "json" ->
+            JSONField
 
         _ ->
             StringField
@@ -264,22 +292,13 @@ decodeFieldType =
 decodeFieldTypeHelper : String -> Decoder FieldType
 decodeFieldTypeHelper fieldType =
     case fieldType of
-        "string" ->
-            Decode.succeed StringField
-
-        "int" ->
-            Decode.succeed IntField
-
         "ref" ->
             Decode.map2 RefField
                 (Decode.field "conceptId" Decode.int)
                 (Decode.field "refType" Decode.string |> Decode.andThen decodeRefTypeHelper)
 
-        _ ->
-            Decode.fail <|
-                "Trying to decode fieldType, but type "
-                    ++ fieldType
-                    ++ " is not supported."
+        strFieldType ->
+            Decode.succeed (stringToFieldType strFieldType)
 
 
 decodeRefTypeHelper : String -> Decoder RefType

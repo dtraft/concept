@@ -250,6 +250,7 @@ $input-background: #BDBDBD;
 
   .concept--field{
     line-height: 30px;
+    height: 30px;
     background-color: #eee;
     font-size: 14px;
     padding: 0 10px 0 0;
@@ -257,7 +258,13 @@ $input-background: #BDBDBD;
     justify-content: space-between;
 
     .concept--field--name{
-      flex: 1;
+      > span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 124px;
+        float: right;
+      }
     }
 
     .concept--field--type-selector{
