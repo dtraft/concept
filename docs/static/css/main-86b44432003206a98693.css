@@ -19,6 +19,9 @@ button:focus,
 button:active {
   outline: none; }
 
+.app-wrapper .spacer {
+  height: 112px; }
+
 .app-wrapper .header {
   padding: 15px;
   height: 112px;
@@ -28,7 +31,11 @@ button:active {
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: justify;
-      justify-content: space-between; }
+      justify-content: space-between;
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 999; }
   .app-wrapper .header h1 {
     margin-top: 0;
     margin-bottom: 5px; }
@@ -138,7 +145,8 @@ button:active {
   -ms-flex: 1;
       flex: 1;
   background-size: 20px 20px;
-  background-image: linear-gradient(to right, #F5F5F5 1px, transparent 1px), linear-gradient(to bottom, #F5F5F5 1px, transparent 1px); }
+  background-image: linear-gradient(to right, #F5F5F5 1px, transparent 1px), linear-gradient(to bottom, #F5F5F5 1px, transparent 1px);
+  overflow: scroll; }
   .app-wrapper .board > svg {
     height: 100%;
     width: 100%; }

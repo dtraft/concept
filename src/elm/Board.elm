@@ -14,6 +14,7 @@ import List.Extra as List
 -- Project Modules
 
 import Board.Markers exposing (markers)
+import Board.Helpers exposing (maxXPosition, maxYPosition)
 import Schemas.Concept as Concept exposing (Concept, FieldType(..), RefType(..), Field, fieldTypeToString, stringToFieldType)
 import Types exposing (Reference)
 
@@ -60,9 +61,23 @@ view props =
 
                 Nothing ->
                     []
+
+        minHeight =
+            props.concepts
+                |> Dict.values
+                |> List.foldl maxYPosition 0
+
+        minWidth =
+            props.concepts
+                |> Dict.values
+                |> List.foldl maxXPosition 0
     in
         svg
-            []
+            [ Html.style
+                [ ( "width", (toString minWidth) ++ "px" )
+                , ( "height", (toString minHeight) ++ "px" )
+                ]
+            ]
             (markers
                 ++ renderedReferences
                 ++ renderedConcepts

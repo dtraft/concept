@@ -400,6 +400,7 @@ view model =
                         ]
                     ]
                 ]
+            , div [ class "spacer" ] []
             , div
                 [ classList
                     [ ( "board", True )
@@ -408,8 +409,8 @@ view model =
                 , style
                     [ ( "transform", "scale(" ++ toString model.scale ++ ")" )
                     , ( "transform-origin", "0 0" )
-                    , ( "width", (toString (100 / model.scale)) ++ "%" )
-                    , ( "height", "calc(" ++ toString (100 / model.scale) ++ "% - 112px)" )
+                    , ( "min-width", (toString (100 / model.scale)) ++ "%" )
+                    , ( "min-height", "calc(" ++ toString (100 / model.scale) ++ "% - 112px)" )
                     ]
                 ]
                 [ Board.view boardProps ]
