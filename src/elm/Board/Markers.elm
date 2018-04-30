@@ -24,7 +24,7 @@ markers =
                 []
             ]
         , marker
-            [ id "to-one"
+            [ id "to-one-horizontal"
             , orient "auto"
             , markerWidth "2"
             , markerHeight "15"
@@ -33,6 +33,38 @@ markers =
             ]
             [ Svg.path
                 [ d "M0,0 V15"
+                , strokeWidth "2"
+                , stroke "black"
+                , shapeRendering "optimizeSpeed"
+                ]
+                []
+            ]
+        , marker
+            [ id "to-one-top"
+            , orient "auto"
+            , markerWidth "15"
+            , markerHeight "2"
+            , refX "7.5"
+            , refY "7.5"
+            ]
+            [ Svg.path
+                [ d "M0,0 H15"
+                , strokeWidth "2"
+                , stroke "black"
+                , shapeRendering "optimizeSpeed"
+                ]
+                []
+            ]
+        , marker
+            [ id "to-one-bottom"
+            , orient "auto"
+            , markerWidth "15"
+            , markerHeight "2"
+            , refX "7.5"
+            , refY "-7.5"
+            ]
+            [ Svg.path
+                [ d "M0,0 H15"
                 , strokeWidth "2"
                 , stroke "black"
                 , shapeRendering "optimizeSpeed"

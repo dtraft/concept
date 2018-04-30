@@ -14,7 +14,7 @@ import List.Extra as List
 -- Project Modules
 
 import Board.Markers exposing (markers)
-import Board.Helpers exposing (maxXPosition, maxYPosition)
+import Board.Helpers exposing (maxXPosition, maxYPosition, getReferenceTarget, referenceStartCoordinates, referenceTargetCoordinates, conceptWidth, conceptHeight, Orientation(..))
 import Schemas.Concept as Concept exposing (Concept, FieldType(..), RefType(..), Field, fieldTypeToString, stringToFieldType)
 import Types exposing (Reference)
 
@@ -36,11 +36,6 @@ type alias Bounds =
 
 type alias Corners =
     ( Int, Int, Int, Int )
-
-
-type Orientation
-    = Horizontal
-    | Vertical
 
 
 view : Props msg -> Html msg
@@ -97,107 +92,69 @@ viewConceptReferenceArrows concepts ({ position } as concept) acc =
     concept.fields
         |> List.indexedMap
             (\index field ->
-                case field.fieldType of
-                    RefField targetId refType ->
-                        case Dict.get targetId concepts of
-                            Just target ->
-                                let
-                                    startX =
-                                        if target.position.x <= concept.position.x then
-                                            concept.position.x
+                case getReferenceTarget concepts field of
+                    Just ( target, refType ) ->
+                        let
+                            ( startX, startY ) =
+                                referenceStartCoordinates concept index target
+
+                            ( endX, endY, orientation ) =
+                                referenceTargetCoordinates target ( startX, startY )
+
+                            -- Get markers
+                            ( startMarker, endMarker ) =
+                                case ( refType, orientation ) of
+                                    ( OneToOne, Vertical ) ->
+                                        if (toFloat startY) >= endY then
+                                            ( "one", "to-one-bottom" )
                                         else
-                                            concept.position.x + 300
+                                            ( "one", "to-one-top" )
 
-                                    startY =
-                                        concept.position.y + 40 + 30 * index + 15
+                                    ( OneToOne, Horizontal ) ->
+                                        ( "one", "to-one-horizontal" )
 
-                                    targetRightX =
-                                        target.position.x + 300
+                                    ( OneToMany, Vertical ) ->
+                                        ( "one", "to-many" )
 
-                                    targetBottomY =
-                                        target.fields
-                                            |> List.length
-                                            |> (*) 30
-                                            |> toFloat
-                                            |> (+) (toFloat 40 * 2)
-                                            |> (+) (toFloat target.position.y)
+                                    ( OneToMany, Horizontal ) ->
+                                        ( "one", "to-many" )
 
-                                    endMidX =
-                                        target.position.x + 150
+                                    ( ManyToMany, Vertical ) ->
+                                        ( "many", "to-many" )
 
-                                    endMidY =
-                                        (targetBottomY - (toFloat target.position.y))
-                                            |> (*) 0.5
-                                            |> (+) (toFloat target.position.y)
+                                    ( ManyToMany, Horizontal ) ->
+                                        ( "many", "to-many" )
+                        in
+                            let
+                                midX =
+                                    (endX + (toFloat startX)) / 2
 
-                                    -- Determine all possible targets
-                                    endOptions =
-                                        [ ( toFloat endMidX, toFloat target.position.y, Vertical )
-                                        , ( toFloat targetRightX, endMidY, Horizontal )
-                                        , ( toFloat endMidX, targetBottomY, Vertical )
-                                        , ( toFloat target.position.x, endMidY, Horizontal )
-                                        ]
+                                midY =
+                                    (endY + (toFloat startY)) / 2
 
-                                    -- See which one is closest
-                                    maybeMin =
-                                        endOptions
-                                            |> List.minimumBy
-                                                (\( x, y, _ ) ->
-                                                    ((toFloat startX - x) ^ 2)
-                                                        |> (+) ((toFloat startY - y) ^ 2)
-                                                        |> sqrt
-                                                )
+                                midLines =
+                                    case orientation of
+                                        Vertical ->
+                                            ("L" ++ (toString endX) ++ "," ++ (toString startY))
+                                                ++ (" L" ++ (toString endX) ++ "," ++ (toString endY))
 
-                                    -- Get markers
-                                    ( startMarker, endMarker ) =
-                                        case refType of
-                                            OneToOne ->
-                                                ( "one", "to-one" )
+                                        Horizontal ->
+                                            ("L" ++ (toString midX) ++ "," ++ (toString startY))
+                                                ++ (" L" ++ (toString midX) ++ "," ++ (toString endY))
+                                                ++ (" L" ++ (toString endX) ++ "," ++ (toString endY))
 
-                                            OneToMany ->
-                                                ( "one", "to-many" )
-
-                                            ManyToMany ->
-                                                ( "many", "to-many" )
-                                in
-                                    case Debug.log "min" maybeMin of
-                                        Just ( endX, endY, orientation ) ->
-                                            let
-                                                midX =
-                                                    (endX + (toFloat startX)) / 2
-
-                                                midY =
-                                                    (endY + (toFloat startY)) / 2
-
-                                                midLines =
-                                                    case orientation of
-                                                        Vertical ->
-                                                            ("L" ++ (toString endX) ++ "," ++ (toString startY))
-                                                                ++ (" L" ++ (toString endX) ++ "," ++ (toString endY))
-
-                                                        Horizontal ->
-                                                            ("L" ++ (toString midX) ++ "," ++ (toString startY))
-                                                                ++ (" L" ++ (toString midX) ++ "," ++ (toString endY))
-                                                                ++ (" L" ++ (toString endX) ++ "," ++ (toString endY))
-
-                                                linePath =
-                                                    ("M" ++ (toString startX) ++ "," ++ (toString startY))
-                                                        ++ (" " ++ midLines)
-                                                        ++ (" " ++ "M" ++ (toString endX) ++ "," ++ (toString endY))
-                                            in
-                                                Svg.path
-                                                    [ d linePath
-                                                    , class "reference-line"
-                                                    , markerStart ("url(#" ++ startMarker ++ ")")
-                                                    , markerEnd ("url(#" ++ endMarker ++ ")")
-                                                    ]
-                                                    []
-
-                                        Nothing ->
-                                            text ""
-
-                            Nothing ->
-                                text ""
+                                linePath =
+                                    ("M" ++ (toString startX) ++ "," ++ (toString startY))
+                                        ++ (" " ++ midLines)
+                                        ++ (" " ++ "M" ++ (toString endX) ++ "," ++ (toString endY))
+                            in
+                                Svg.path
+                                    [ d linePath
+                                    , class "reference-line"
+                                    , markerStart ("url(#" ++ startMarker ++ ")")
+                                    , markerEnd ("url(#" ++ endMarker ++ ")")
+                                    ]
+                                    []
 
                     _ ->
                         text ""

@@ -26,7 +26,7 @@ import Store
 main : Program Never Model Msg
 main =
     Html.program
-        { init = init
+        { init = initTest
         , view = view
         , update = update
         , subscriptions = subscriptions
