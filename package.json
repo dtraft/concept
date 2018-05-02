@@ -1,12 +1,12 @@
 {
-  "name": "elm-webpack-starter",
+  "name": "concept",
   "description": "Webpack setup for writing Elm apps",
-  "version": "0.8.6",
+  "version": "0.0.1",
   "license": "MIT",
-  "author": "Peter Morawiec",
+  "author": "Drew Trafton <drew@bowst.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/moarwick/elm-webpack-starter"
+    "url": "https://github.com/dtraft/concept"
   },
   "scripts": {
     "start": "webpack-dev-server --hot --inline",

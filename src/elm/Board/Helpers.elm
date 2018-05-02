@@ -9,13 +9,52 @@ import List.Extra as List
 
 
 type Orientation
-    = Horizontal
-    | Vertical
+    = Top
+    | Bottom
+    | Left
+    | Right
+
+
+type OrientationType
+    = Vertical
+    | Horizontal
 
 
 padding : Int
 padding =
     100
+
+
+orientationToString : Orientation -> String
+orientationToString orientation =
+    case orientation of
+        Top ->
+            "top"
+
+        Bottom ->
+            "bottom"
+
+        Left ->
+            "left"
+
+        Right ->
+            "right"
+
+
+getOrientationType : Orientation -> OrientationType
+getOrientationType orientation =
+    case orientation of
+        Top ->
+            Vertical
+
+        Bottom ->
+            Vertical
+
+        Left ->
+            Horizontal
+
+        Right ->
+            Horizontal
 
 
 
@@ -84,13 +123,38 @@ referenceTargetCoordinates target ( startX, startY ) =
                 |> (*) 0.5
                 |> (+) (toFloat target.position.y)
 
+        positionY =
+            toFloat target.position.y
+
+        positionX =
+            toFloat target.position.x
+
         -- Determine all possible targets
         endOptions =
-            [ ( endMidX, toFloat target.position.y, Vertical )
+            [ ( endMidX, positionY, Vertical )
             , ( targetRightX, endMidY, Horizontal )
             , ( endMidX, targetBottomY, Vertical )
-            , ( toFloat target.position.x, endMidY, Horizontal )
+            , ( positionX, endMidY, Horizontal )
             ]
+                |> List.map
+                    (\( x, y, orientationType ) ->
+                        let
+                            orientation =
+                                case orientationType of
+                                    Vertical ->
+                                        if (toFloat startY) >= y then
+                                            Bottom
+                                        else
+                                            Top
+
+                                    Horizontal ->
+                                        if (toFloat startX) >= x then
+                                            Right
+                                        else
+                                            Left
+                        in
+                            ( x, y, orientation )
+                    )
 
         -- See which one is closest
         maybeMin =
@@ -103,7 +167,7 @@ referenceTargetCoordinates target ( startX, startY ) =
                     )
     in
         maybeMin
-            |> Maybe.withDefault ( targetRightX, endMidY, Horizontal )
+            |> Maybe.withDefault ( targetRightX, endMidY, Left )
 
 
 conceptWidth : Concept -> Float

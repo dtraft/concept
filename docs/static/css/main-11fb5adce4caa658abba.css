@@ -19,6 +19,9 @@ button:focus,
 button:active {
   outline: none; }
 
+.pointer {
+  cursor: pointer; }
+
 .app-wrapper .spacer {
   height: 112px; }
 

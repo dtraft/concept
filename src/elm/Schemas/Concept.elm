@@ -51,6 +51,20 @@ createConcept name id =
     }
 
 
+createConcept1 : String -> Int -> ( Int, Int ) -> Concept
+createConcept1 name id ( x, y ) =
+    { id = id
+    , name = name
+    , position = Position x y
+    , fields =
+        [ Field "Test #1" StringField
+        , Field "Test #2" (RefField 2 OneToMany)
+        , Field "Test #3" StringField
+        ]
+    , newField = ""
+    }
+
+
 createConcept2 : String -> Int -> ( Int, Int ) -> Concept
 createConcept2 name id ( x, y ) =
     { id = id

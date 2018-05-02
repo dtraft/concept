@@ -14,7 +14,7 @@ import List.Extra as List
 -- Project Modules
 
 import Board.Markers exposing (markers)
-import Board.Helpers exposing (maxXPosition, maxYPosition, getReferenceTarget, referenceStartCoordinates, referenceTargetCoordinates, conceptWidth, conceptHeight, Orientation(..))
+import Board.Helpers exposing (..)
 import Schemas.Concept as Concept exposing (Concept, FieldType(..), RefType(..), Field, fieldTypeToString, stringToFieldType)
 import Types exposing (Reference)
 
@@ -102,28 +102,20 @@ viewConceptReferenceArrows concepts ({ position } as concept) acc =
                                 referenceTargetCoordinates target ( startX, startY )
 
                             -- Get markers
+                            markers =
+                                case refType of
+                                    OneToOne ->
+                                        ( "one", "to-one" )
+
+                                    OneToMany ->
+                                        ( "one", "to-many" )
+
+                                    ManyToMany ->
+                                        ( "many", "to-many" )
+
                             ( startMarker, endMarker ) =
-                                case ( refType, orientation ) of
-                                    ( OneToOne, Vertical ) ->
-                                        if (toFloat startY) >= endY then
-                                            ( "one", "to-one-bottom" )
-                                        else
-                                            ( "one", "to-one-top" )
-
-                                    ( OneToOne, Horizontal ) ->
-                                        ( "one", "to-one-horizontal" )
-
-                                    ( OneToMany, Vertical ) ->
-                                        ( "one", "to-many" )
-
-                                    ( OneToMany, Horizontal ) ->
-                                        ( "one", "to-many" )
-
-                                    ( ManyToMany, Vertical ) ->
-                                        ( "many", "to-many" )
-
-                                    ( ManyToMany, Horizontal ) ->
-                                        ( "many", "to-many" )
+                                markers
+                                    |> Tuple.mapSecond (\m -> m ++ "-" ++ orientationToString orientation)
                         in
                             let
                                 midX =
@@ -133,7 +125,7 @@ viewConceptReferenceArrows concepts ({ position } as concept) acc =
                                     (endY + (toFloat startY)) / 2
 
                                 midLines =
-                                    case orientation of
+                                    case getOrientationType orientation of
                                         Vertical ->
                                             ("L" ++ (toString endX) ++ "," ++ (toString startY))
                                                 ++ (" L" ++ (toString endX) ++ "," ++ (toString endY))
@@ -243,32 +235,23 @@ viewField setField onReferenceStart removeField ({ name, fieldType } as field) =
                         baseRef =
                             RefField conceptId
 
-                        button =
+                        ( rotateRefType, label ) =
                             case refType of
                                 OneToOne ->
-                                    Html.i
-                                        [ Html.class "reference-icon ion-android-checkbox-blank"
-                                        , Html.onClick (setField { field | fieldType = baseRef OneToMany })
-                                        ]
-                                        []
+                                    ( setField { field | fieldType = baseRef OneToMany }, "One-to-one" )
 
                                 OneToMany ->
-                                    Html.i
-                                        [ Html.class "reference-icon ion-ios-photos"
-                                        , Html.onClick (setField { field | fieldType = baseRef ManyToMany })
-                                        ]
-                                        []
+                                    ( setField { field | fieldType = baseRef ManyToMany }, "One-to-many" )
 
                                 ManyToMany ->
-                                    Html.i
-                                        [ Html.class "reference-icon ion-ios-color-filter"
-                                        , Html.onClick (setField { field | fieldType = baseRef OneToOne })
-                                        ]
-                                        []
+                                    ( setField { field | fieldType = baseRef OneToOne }, "Many-to-many" )
                     in
                         Html.div [ Html.class "concept--field--type" ]
-                            [ Html.div [] [ text "Reference" ]
-                            , button
+                            [ Html.div
+                                [ Html.onClick rotateRefType
+                                , Html.class "pointer"
+                                ]
+                                [ text label ]
                             , Html.i
                                 [ Html.class "reference-icon ion-close-round"
                                 , Html.onClick (setField { field | fieldType = StringField })

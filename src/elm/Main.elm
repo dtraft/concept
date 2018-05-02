@@ -15,7 +15,7 @@ import Json.Encode as Encode
 -- Local Imports
 
 import Types exposing (Reference)
-import Schemas.Concept as Concept exposing (Concept, createConcept, createConcept2)
+import Schemas.Concept as Concept exposing (Concept, createConcept, createConcept1, createConcept2)
 import Board
 import Store
 
@@ -65,11 +65,17 @@ initTest =
     let
         ( model, cmd ) =
             init
+
+        concept1 =
+            createConcept1 "Test 1" 1 ( 100, 100 )
+
+        concept2 =
+            createConcept2 "Test 2" 2 ( 300, 300 )
     in
         ( { model
             | concepts =
-                Dict.singleton 1 (createConcept2 "Test 1" 1 ( 100, 100 ))
-                    |> Dict.insert 2 (createConcept2 "Test 2" 2 ( 700, 100 ))
+                Dict.singleton 1 concept1
+                    |> Dict.insert 2 concept2
             , scale = 1
           }
         , cmd
