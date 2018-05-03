@@ -160,7 +160,7 @@ viewCreateReferenceArrow concepts { conceptId, fieldIndex, position } =
         Just concept ->
             let
                 ( startX, startY ) =
-                    ( concept.position.x + 300 - 12, concept.position.y + 40 + 30 * fieldIndex + 30 - 15 )
+                    ( concept.position.x + (conceptWidth concept) - 12, concept.position.y + 40 + 30 * fieldIndex + 30 - 15 )
 
                 ( endX, endY ) =
                     ( position.x, position.y - 112 )
@@ -185,6 +185,9 @@ viewConcept { onDragMouseDown, onReferenceMouseDown, onReferenceMouseUp, toConce
         conceptMsg =
             toConceptMsg id
 
+        boxWidth =
+            conceptWidth concept
+
         renderedFields =
             fields
                 |> List.indexedMap
@@ -202,7 +205,7 @@ viewConcept { onDragMouseDown, onReferenceMouseDown, onReferenceMouseUp, toConce
             ]
             [ Html.div
                 [ Html.class "concept"
-                , Html.style [ ( "width", "300px" ) ]
+                , Html.style [ ( "width", toString boxWidth ++ "px" ) ]
                 , onReferenceMouseUp id
                 ]
                 [ Html.div

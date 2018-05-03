@@ -200,7 +200,7 @@ button:active {
       display: block;
       overflow: hidden;
       text-overflow: ellipsis;
-      width: 124px;
+      max-width: 325px;
       float: right; }
     .concept .concept--field .concept--field--type-selector {
       display: -ms-flexbox;

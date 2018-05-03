@@ -59,7 +59,7 @@ createConcept1 name id ( x, y ) =
     , fields =
         [ Field "Test #1" StringField
         , Field "Test #2" (RefField 2 OneToMany)
-        , Field "Test #3" StringField
+        , Field "Here is a field with an extremely long name Here is a field with an extremely long name" StringField
         ]
     , newField = ""
     }

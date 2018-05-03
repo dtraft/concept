@@ -96,7 +96,7 @@ referenceStartCoordinates source fieldIndex target =
             if target.position.x <= source.position.x then
                 source.position.x
             else
-                source.position.x + 300
+                source.position.x + conceptWidth source
 
         y =
             source.position.y + 40 + 30 * fieldIndex + 15
@@ -109,14 +109,16 @@ referenceTargetCoordinates target ( startX, startY ) =
     let
         -- Get target bottom corner coordinates
         targetRightX =
-            (toFloat target.position.x) + (conceptWidth target)
+            target.position.x
+                + (conceptWidth target)
+                |> toFloat
 
         targetBottomY =
             (toFloat target.position.y) + (conceptHeight target)
 
         -- Get target mid points
         endMidX =
-            (toFloat target.position.x) + (conceptWidth target / 2)
+            (toFloat target.position.x) + (toFloat (conceptWidth target) / 2)
 
         endMidY =
             (targetBottomY - (toFloat target.position.y))
@@ -170,9 +172,16 @@ referenceTargetCoordinates target ( startX, startY ) =
             |> Maybe.withDefault ( targetRightX, endMidY, Left )
 
 
-conceptWidth : Concept -> Float
+conceptWidth : Concept -> Int
 conceptWidth concept =
-    300
+    concept.fields
+        |> List.map (\f -> String.length f.name)
+        |> List.maximum
+        |> Maybe.withDefault 0
+        |> (*) 7
+        |> (+) 175
+        |> clamp 300 500
+        |> Debug.log ("Count for: " ++ concept.name)
 
 
 conceptHeight : Concept -> Float

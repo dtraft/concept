@@ -266,7 +266,7 @@ $input-background: #BDBDBD;
         display: block;
         overflow: hidden;
         text-overflow: ellipsis;
-        width: 124px;
+        max-width: 325px;
         float: right;
       }
     }
