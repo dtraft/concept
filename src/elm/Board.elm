@@ -196,6 +196,7 @@ viewConcept { onDragMouseDown, onReferenceMouseDown, onReferenceMouseUp, toConce
                             (conceptMsg << (Concept.SetField i))
                             (onReferenceMouseDown id i)
                             (conceptMsg (Concept.RemoveField i))
+                            (conceptMsg << (Concept.MoveField i))
                             f
                     )
     in
@@ -204,7 +205,10 @@ viewConcept { onDragMouseDown, onReferenceMouseDown, onReferenceMouseUp, toConce
             , y (toString position.y)
             ]
             [ Html.div
-                [ Html.class "concept"
+                [ Html.classList
+                    [ ( "concept", True )
+                    , ( "concept--reordering", concept.isReordering )
+                    ]
                 , Html.style [ ( "width", toString boxWidth ++ "px" ) ]
                 , onReferenceMouseUp id
                 ]
@@ -218,6 +222,15 @@ viewConcept { onDragMouseDown, onReferenceMouseDown, onReferenceMouseUp, toConce
                         , Html.onClick (removeConcept id)
                         ]
                         []
+                    , Html.i
+                        [ Html.classList
+                            [ ( "concept--reorder", True )
+                            , ( "ion-arrow-swap", not concept.isReordering )
+                            , ( "ion-checkmark-round", concept.isReordering )
+                            ]
+                        , Html.onClick (conceptMsg Concept.ToggleReorder)
+                        ]
+                        []
                     ]
                 , Html.div [ Html.class "concept--fields-wrapper" ] renderedFields
                 , viewNewField
@@ -228,8 +241,8 @@ viewConcept { onDragMouseDown, onReferenceMouseDown, onReferenceMouseUp, toConce
             ]
 
 
-viewField : (Field -> msg) -> Attribute msg -> msg -> Field -> Html msg
-viewField setField onReferenceStart removeField ({ name, fieldType } as field) =
+viewField : (Field -> msg) -> Attribute msg -> msg -> (Int -> msg) -> Field -> Html msg
+viewField setField onReferenceStart removeField moveField ({ name, fieldType } as field) =
     let
         renderedFieldType =
             case fieldType of
@@ -318,6 +331,20 @@ viewField setField onReferenceStart removeField ({ name, fieldType } as field) =
                     , Html.onClick removeField
                     ]
                     []
+                , Html.div
+                    [ Html.class "concept--field--reorder-icons"
+                    ]
+                    [ Html.i
+                        [ Html.class "concept--field--reorder-icon ion-chevron-up"
+                        , Html.onClick (moveField -1)
+                        ]
+                        []
+                    , Html.i
+                        [ Html.class "concept--field--reorder-icon ion-chevron-down"
+                        , Html.onClick (moveField 1)
+                        ]
+                        []
+                    ]
                 ]
             , renderedFieldType
             ]

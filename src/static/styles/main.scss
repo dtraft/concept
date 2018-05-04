@@ -229,9 +229,11 @@ $input-background: #BDBDBD;
     cursor: pointer;
   }
 
+  .concept--reorder,
   .concept--remove{
     float: right;
     visibility: hidden;
+    margin-right: 5px;
   }
 
   .concept--name{ 
@@ -245,6 +247,7 @@ $input-background: #BDBDBD;
     background: $blue;
 
     &:hover{
+      .concept--reorder,
       .concept--remove{
         visibility: visible; 
       }
@@ -268,6 +271,7 @@ $input-background: #BDBDBD;
         text-overflow: ellipsis;
         max-width: 325px;
         float: right;
+        height: 100%;
       }
     }
 
@@ -302,6 +306,20 @@ $input-background: #BDBDBD;
       margin-left: 5px;
     }
 
+    .concept--field--reorder-icons{
+      display: none;
+      float: left;
+      flex-direction: column;
+      width: 20.5px;
+      text-align: center;
+      color: #7A7A7A;
+
+       > * {
+         height: 15px;
+         margin-top: -5px;
+       }
+    }
+
     &:hover{
       .concept--field--remove,
       .reference-icon{
@@ -326,6 +344,29 @@ $input-background: #BDBDBD;
       font-size: 14px; 
       background: $input-background;
       width: 100%;
+    }
+  }
+
+  &.concept--reordering{
+    .concept--reorder{
+      visibility: visible;
+    }
+    .concept--remove{
+      display: none;
+    }
+
+    .concept--field{
+      .concept--field--remove{
+        display: none;
+      }
+
+      .reference-icon{
+        visibility: hidden !important;
+      }
+
+      .concept--field--reorder-icons{
+        display: flex;
+      }
     }
   }
 }

@@ -16,6 +16,7 @@ type alias Concept =
     , position : Position
     , fields : List Field
     , newField : String
+    , isReordering : Bool
     }
 
 
@@ -48,6 +49,7 @@ createConcept name id =
     , position = Position 100 100
     , fields = []
     , newField = ""
+    , isReordering = False
     }
 
 
@@ -62,6 +64,7 @@ createConcept1 name id ( x, y ) =
         , Field "Here is a field with an extremely long name Here is a field with an extremely long name" StringField
         ]
     , newField = ""
+    , isReordering = False
     }
 
 
@@ -76,6 +79,7 @@ createConcept2 name id ( x, y ) =
         , Field "Test #3" StringField
         ]
     , newField = ""
+    , isReordering = False
     }
 
 
@@ -89,6 +93,8 @@ type Msg
     | SetField Int Field
     | SetFieldType Int FieldType
     | RemoveField Int
+    | ToggleReorder
+    | MoveField Int Int
 
 
 
@@ -159,9 +165,29 @@ update msg concept =
             in
                 { concept | fields = nextFields }
 
+        ToggleReorder ->
+            { concept | isReordering = not concept.isReordering }
+
+        MoveField index offset ->
+            { concept | fields = moveItem index offset concept.fields }
+
 
 
 -- Helpers
+
+
+moveItem : Int -> Int -> List a -> List a
+moveItem fromPos offset list =
+    let
+        listWithoutMoved =
+            List.take fromPos list ++ List.drop (fromPos + 1) list
+
+        moved =
+            List.take 1 <| List.drop fromPos list
+    in
+        List.take (fromPos + offset) listWithoutMoved
+            ++ moved
+            ++ List.drop (fromPos + offset) listWithoutMoved
 
 
 fieldTypeToString : FieldType -> String
@@ -284,6 +310,7 @@ decode =
         |> Decode.required "position" Mouse.position
         |> Decode.required "fields" (Decode.list decodeField)
         |> Decode.hardcoded ""
+        |> Decode.hardcoded False
 
 
 decodeField : Decoder Field

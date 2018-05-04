@@ -77,7 +77,7 @@ maxXPosition : Concept -> Int -> Int
 maxXPosition concept max =
     let
         width =
-            concept.position.x + 300 + padding
+            concept.position.x + (conceptWidth concept) + padding
     in
         if width > max then
             width
@@ -181,7 +181,6 @@ conceptWidth concept =
         |> (*) 7
         |> (+) 175
         |> clamp 300 500
-        |> Debug.log ("Count for: " ++ concept.name)
 
 
 conceptHeight : Concept -> Float

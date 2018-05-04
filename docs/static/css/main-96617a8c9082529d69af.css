@@ -174,9 +174,11 @@ button:active {
   overflow: hidden; }
   .concept i {
     cursor: pointer; }
+  .concept .concept--reorder,
   .concept .concept--remove {
     float: right;
-    visibility: hidden; }
+    visibility: hidden;
+    margin-right: 5px; }
   .concept .concept--name {
     fill: #fff; }
   .concept .concept--header {
@@ -184,6 +186,7 @@ button:active {
     color: #fff;
     line-height: 40px;
     background: #008AB3; }
+    .concept .concept--header:hover .concept--reorder,
     .concept .concept--header:hover .concept--remove {
       visibility: visible; }
   .concept .concept--field {
@@ -201,7 +204,8 @@ button:active {
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 325px;
-      float: right; }
+      float: right;
+      height: 100%; }
     .concept .concept--field .concept--field--type-selector {
       display: -ms-flexbox;
       display: flex; }
@@ -223,6 +227,17 @@ button:active {
       visibility: hidden; }
     .concept .concept--field .reference-icon:last-child {
       margin-left: 5px; }
+    .concept .concept--field .concept--field--reorder-icons {
+      display: none;
+      float: left;
+      -ms-flex-direction: column;
+          flex-direction: column;
+      width: 20.5px;
+      text-align: center;
+      color: #7A7A7A; }
+      .concept .concept--field .concept--field--reorder-icons > * {
+        height: 15px;
+        margin-top: -5px; }
     .concept .concept--field:hover .concept--field--remove,
     .concept .concept--field:hover .reference-icon {
       visibility: visible; }
@@ -239,6 +254,17 @@ button:active {
       font-size: 14px;
       background: #BDBDBD;
       width: 100%; }
+  .concept.concept--reordering .concept--reorder {
+    visibility: visible; }
+  .concept.concept--reordering .concept--remove {
+    display: none; }
+  .concept.concept--reordering .concept--field .concept--field--remove {
+    display: none; }
+  .concept.concept--reordering .concept--field .reference-icon {
+    visibility: hidden !important; }
+  .concept.concept--reordering .concept--field .concept--field--reorder-icons {
+    display: -ms-flexbox;
+    display: flex; }
 
 .board.create-reference * {
   -webkit-user-select: none;
