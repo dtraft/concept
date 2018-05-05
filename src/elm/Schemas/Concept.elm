@@ -32,6 +32,9 @@ type FieldType
     | FloatField
     | DecimalField
     | BooleanField
+    | DateField
+    | TimeField
+    | DateTimeField
     | JSONField
     | RefField Int RefType
 
@@ -211,6 +214,15 @@ fieldTypeToString fieldType =
         JSONField ->
             "json"
 
+        DateField ->
+            "date"
+
+        TimeField ->
+            "time"
+
+        DateTimeField ->
+            "datetime"
+
         RefField _ _ ->
             "ref"
 
@@ -248,6 +260,15 @@ stringToFieldType input =
 
         "json" ->
             JSONField
+
+        "date" ->
+            DateField
+
+        "time" ->
+            TimeField
+
+        "datetime" ->
+            DateTimeField
 
         _ ->
             StringField

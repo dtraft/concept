@@ -8,7 +8,6 @@ import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Mouse exposing (Position)
 import Dict exposing (Dict)
-import List.Extra as List
 
 
 -- Project Modules
@@ -307,6 +306,21 @@ viewField setField onReferenceStart removeField moveField ({ name, fieldType } a
                                     , Html.selected (fieldType == DecimalField)
                                     ]
                                     [ text "Decimal" ]
+                                , Html.option
+                                    [ Html.value (fieldTypeToString DateField)
+                                    , Html.selected (fieldType == DateField)
+                                    ]
+                                    [ text "Date" ]
+                                , Html.option
+                                    [ Html.value (fieldTypeToString TimeField)
+                                    , Html.selected (fieldType == TimeField)
+                                    ]
+                                    [ text "Time" ]
+                                , Html.option
+                                    [ Html.value (fieldTypeToString DateTimeField)
+                                    , Html.selected (fieldType == DateTimeField)
+                                    ]
+                                    [ text "Datetime" ]
                                 , Html.option
                                     [ Html.value (fieldTypeToString JSONField)
                                     , Html.selected (fieldType == JSONField)
