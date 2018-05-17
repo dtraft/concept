@@ -19,3 +19,6 @@ port download : Value -> Cmd msg
 
 
 port loadFile : () -> Cmd msg
+
+
+port setUrl : String -> Cmd msg

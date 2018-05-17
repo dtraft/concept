@@ -1,11 +1,15 @@
 import { createCipher } from 'crypto';
 
+import Noty from 'noty';
+
 // pull in desired CSS/SASS files
 require('./styles/main.scss');
 
 // inject bundled Elm app into div#main
 var Elm = require('../elm/Main');
-var app = Elm.Main.embed(document.getElementById('main'));
+var app = Elm.Main.embed(document.getElementById('main'), {
+  projectId: window.location.hash.substr(1)
+});
 
 
 app.ports.save.subscribe(function (project) {
@@ -41,6 +45,20 @@ app.ports.loadFile.subscribe(function () {
   var reader = new FileReader();
   reader.onload = onReaderLoad;
   reader.readAsText(file);
+});
+
+app.ports.setUrl.subscribe(function (nextId) {
+  if (history.pushState) {
+    history.pushState(null, null, '#' + nextId);
+  }
+  else {
+    location.hash = '#' + nextId;
+  }
+
+  new Noty({
+    text: 'Project Saved!',
+    timeout: 3000
+  }).show();
 });
 
 function onReaderLoad(event) {

@@ -4,9 +4,11 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Events.Extra exposing (onEnter)
+import Http
 import Dict exposing (Dict)
 import Json.Decode exposing (succeed, Decoder, map, map2, field, int)
 import Mouse exposing (Position)
+import RemoteData exposing (WebData, RemoteData(..))
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline as Decode
 import Json.Encode as Encode
@@ -15,7 +17,8 @@ import Json.Encode as Encode
 -- Local Imports
 
 import Types exposing (Reference)
-import Schemas.Concept as Concept exposing (Concept, createConcept, createConcept1, createConcept2)
+import Schemas.Project as Project exposing (Project)
+import Schemas.Concept as Concept exposing (Concept)
 import Board
 import Store
 
@@ -23,9 +26,9 @@ import Store
 -- APP
 
 
-main : Program Never Model Msg
+main : Program Flags Model Msg
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update
@@ -37,49 +40,54 @@ main =
 -- MODEL
 
 
+type alias Flags =
+    { projectId : String }
+
+
 type alias Model =
-    { projectTitle : String
+    { project : Project
     , newConceptName : String
-    , concepts : Dict Int Concept
     , mouseInteraction : MouseInteraction
     , scale : Float
+    , status : Status
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+type Status
+    = Loading
+    | Saving
+    | Loaded
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
     let
+        ( nextCmd, nextStatus ) =
+            case flags.projectId of
+                "" ->
+                    ( Cmd.none, Loaded )
+
+                id_ ->
+                    ( loadProject id_, Loading )
+
         nextModel =
-            { projectTitle = ""
+            { project = Project.empty
             , newConceptName = ""
-            , concepts = Dict.empty
             , mouseInteraction = None
             , scale = 0.8
+            , status = nextStatus
             }
     in
-        ( nextModel, Cmd.none )
+        ( nextModel, nextCmd )
 
 
-initTest : ( Model, Cmd Msg )
-initTest =
+initTest : Flags -> ( Model, Cmd Msg )
+initTest flags =
     let
         ( model, cmd ) =
-            init
-
-        concept1 =
-            createConcept1 "Test 1" 1 ( 100, 100 )
-
-        concept2 =
-            createConcept2 "Test 2" 2 ( 300, 300 )
+            init flags
     in
-        ( { model
-            | concepts =
-                Dict.singleton 1 concept1
-                    |> Dict.insert 2 concept2
-            , scale = 1
-          }
-        , cmd
-        )
+        ( { model | project = Project.test1 }, cmd )
 
 
 type MouseInteraction
@@ -100,14 +108,13 @@ type alias Drag =
 
 
 type Msg
-    = SetTitle String
-    | SetNewConceptName String
-    | AddConcept String
-    | RemoveConcept Int
+    = SetNewConceptName String
     | DragMsg SubDragMsg
     | ReferenceMsg SubReferenceMsg
-    | ConceptMsg Int Concept.Msg
+    | ProjectMsg Project.Msg
     | SaveProject
+    | SaveProjectResponse (Result Http.Error Project)
+    | LoadProjectResponse (Result Http.Error Project)
     | DownloadProject
     | LoadProject
     | SetLoadedProject Encode.Value
@@ -132,49 +139,15 @@ type SubReferenceMsg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SetTitle title ->
-            ( { model | projectTitle = title }, Cmd.none )
-
         SetNewConceptName name ->
             ( { model | newConceptName = name }, Cmd.none )
 
-        AddConcept name ->
+        ProjectMsg subMsg ->
             let
-                nextId =
-                    model.concepts
-                        |> Dict.values
-                        |> List.foldl
-                            (\c acc ->
-                                if c.id > acc then
-                                    c.id
-                                else
-                                    acc
-                            )
-                            1
-                        |> (+) 1
-
-                newConcept =
-                    createConcept name nextId
-
-                nextConcepts =
-                    Dict.insert nextId newConcept model.concepts
+                nextProject =
+                    Project.update subMsg model.project
             in
-                ( { model | concepts = nextConcepts, newConceptName = "" }, Cmd.none )
-
-        RemoveConcept id ->
-            let
-                nextConcepts =
-                    Dict.remove id model.concepts
-            in
-                ( { model | concepts = nextConcepts }, Cmd.none )
-
-        ConceptMsg id subMsg ->
-            let
-                nextConcepts =
-                    model.concepts
-                        |> Dict.update id (Concept.updateInDict subMsg)
-            in
-                ( { model | concepts = nextConcepts }, Cmd.none )
+                ( { model | project = nextProject }, Cmd.none )
 
         DragMsg subMsg ->
             ( (dragUpdate subMsg model), Cmd.none )
@@ -183,10 +156,42 @@ update msg model =
             ( (referenceUpdate subMsg model), Cmd.none )
 
         SaveProject ->
-            ( model, Store.save (encodeProject model) )
+            ( { model | status = Saving }, saveProject model.project )
+
+        SaveProjectResponse result ->
+            let
+                ( nextModel, nextCmds ) =
+                    case result of
+                        Ok nextProject ->
+                            let
+                                nextCmd =
+                                    case nextProject.id of
+                                        Just id_ ->
+                                            Store.setUrl id_
+
+                                        Nothing ->
+                                            Cmd.none
+                            in
+                                ( { model | project = nextProject }, nextCmd )
+
+                        Err error ->
+                            let
+                                nextError =
+                                    Debug.log "Save error: " error
+                            in
+                                ( model, Cmd.none )
+            in
+                ( { nextModel | status = Loaded }, nextCmds )
+
+        LoadProjectResponse result ->
+            let
+                ( nextModel, _ ) =
+                    update (SaveProjectResponse result) model
+            in
+                ( nextModel, Cmd.none )
 
         DownloadProject ->
-            ( model, Store.download (encodeProject model) )
+            ( model, Store.download (Project.encode model.project) )
 
         LoadProject ->
             ( model, Store.load () )
@@ -194,9 +199,9 @@ update msg model =
         SetLoadedProject value ->
             let
                 nextModel =
-                    case Decode.decodeValue decodeModel value of
-                        Ok model ->
-                            model
+                    case Decode.decodeValue Project.decode value of
+                        Ok nextProject ->
+                            { model | project = nextProject }
 
                         Err error ->
                             let
@@ -232,7 +237,7 @@ update msg model =
 
 
 referenceUpdate : SubReferenceMsg -> Model -> Model
-referenceUpdate msg ({ mouseInteraction, concepts, scale } as model) =
+referenceUpdate msg ({ mouseInteraction, project, scale } as model) =
     case msg of
         ReferenceStart reference ->
             let
@@ -272,7 +277,8 @@ referenceUpdate msg ({ mouseInteraction, concepts, scale } as model) =
                     let
                         msg =
                             Concept.SetFieldType reference.fieldIndex (Concept.RefField targetId Concept.OneToOne)
-                                |> ConceptMsg reference.conceptId
+                                |> Project.ConceptMsg reference.conceptId
+                                |> ProjectMsg
 
                         ( nextModel, cmd ) =
                             update msg model
@@ -287,18 +293,22 @@ referenceUpdate msg ({ mouseInteraction, concepts, scale } as model) =
 
 
 dragUpdate : SubDragMsg -> Model -> Model
-dragUpdate msg ({ concepts } as model) =
+dragUpdate msg ({ project } as model) =
     case msg of
         DragStart id xy ->
             let
                 nextDrag =
                     Drag xy xy id
 
-                nextConcepts =
-                    concepts
-                        |> Dict.update nextDrag.conceptId (updateConceptPosition model.scale nextDrag)
+                nextMsg =
+                    Concept.UpdatePosition model.scale ( nextDrag.start, nextDrag.current )
+                        |> Project.ConceptMsg nextDrag.conceptId
+                        |> ProjectMsg
+
+                ( nextModel, _ ) =
+                    update nextMsg model
             in
-                { model | mouseInteraction = DragInteraction nextDrag, concepts = nextConcepts }
+                { nextModel | mouseInteraction = DragInteraction nextDrag }
 
         DragAt xy ->
             case model.mouseInteraction of
@@ -307,11 +317,15 @@ dragUpdate msg ({ concepts } as model) =
                         nextDrag =
                             { drag | current = xy, start = drag.current }
 
-                        nextConcepts =
-                            concepts
-                                |> Dict.update nextDrag.conceptId (updateConceptPosition model.scale nextDrag)
+                        nextMsg =
+                            Concept.UpdatePosition model.scale ( nextDrag.start, nextDrag.current )
+                                |> Project.ConceptMsg nextDrag.conceptId
+                                |> ProjectMsg
+
+                        ( nextModel, _ ) =
+                            update nextMsg model
                     in
-                        { model | mouseInteraction = DragInteraction nextDrag, concepts = nextConcepts }
+                        { nextModel | mouseInteraction = DragInteraction nextDrag }
 
                 _ ->
                     model
@@ -320,23 +334,44 @@ dragUpdate msg ({ concepts } as model) =
             { model | mouseInteraction = None }
 
 
-updateConceptPosition : Float -> Drag -> Maybe Concept -> Maybe Concept
-updateConceptPosition scale { start, current } maybeConcept =
-    case maybeConcept of
-        Just ({ position } as concept) ->
-            let
-                nextPosition =
-                    { x = position.x + round ((toFloat (current.x - start.x)) / scale)
-                    , y = position.y + round ((toFloat (current.y - start.y)) / scale)
+
+-- HTTP
+
+
+loadProject : String -> Cmd Msg
+loadProject id_ =
+    Http.get ("https://api.jsonbin.io/b/" ++ id_ ++ "/latest") (Project.decodeLoad id_)
+        |> Http.send LoadProjectResponse
+
+
+saveProject : Project -> Cmd Msg
+saveProject project =
+    let
+        body =
+            project
+                |> Project.encode
+                |> Http.jsonBody
+    in
+        case project.id of
+            Just id_ ->
+                Http.request
+                    { method = "PUT"
+                    , headers = []
+                    , url = "https://api.jsonbin.io/b/" ++ id_
+                    , body = body
+                    , expect = Http.expectJson Project.decodeUpdate
+                    , timeout = Nothing
+                    , withCredentials = False
                     }
-            in
-                Just { concept | position = nextPosition }
+                    |> Http.send SaveProjectResponse
 
-        Nothing ->
-            Nothing
+            Nothing ->
+                Http.post "https://api.jsonbin.io/b" body Project.decodeResponse
+                    |> Http.send SaveProjectResponse
 
 
 
+-- Decode Response
 -- VIEW
 -- Html is defined as: elem [ attribs ][ children ]
 -- CSS can be applied via class names or inline style attrib
@@ -358,10 +393,22 @@ view model =
                 onDragMouseDown
                 onReferenceMouseDown
                 onReferenceMouseUp
-                RemoveConcept
-                model.concepts
-                ConceptMsg
+                (ProjectMsg << Project.RemoveConcept)
+                model.project.concepts
+                (\i msg -> ProjectMsg <| Project.ConceptMsg i msg)
                 referenceSituation
+
+        saveText =
+            if model.status == Saving then
+                "Saving..."
+            else
+                "Save Project"
+
+        loadingText =
+            if model.status == Loading then
+                "Loading Project..."
+            else
+                "Enter Project Title"
     in
         div [ class "app-wrapper" ]
             [ div [ class "header" ]
@@ -373,9 +420,9 @@ view model =
                         [ class "header--title" ]
                         [ input
                             [ id "project-title"
-                            , placeholder "Enter Project Title"
-                            , onInput SetTitle
-                            , value model.projectTitle
+                            , placeholder loadingText
+                            , onInput (ProjectMsg << Project.SetTitle)
+                            , value model.project.title
                             ]
                             []
                         ]
@@ -391,8 +438,7 @@ view model =
                                 []
                             , div [ class "header--utility--menu--list--wrapper" ]
                                 [ ul [ class "header--utility--menu--list" ]
-                                    [ li [ onClick SaveProject ] [ text "Save Project" ]
-                                    , li [ onClick LoadProject ] [ text "Load Project" ]
+                                    [ li [ onClick SaveProject ] [ text saveText ]
                                     , li [ onClick DownloadProject ] [ text "Download" ]
                                     , li [ class "file-input" ]
                                         [ input
@@ -416,7 +462,7 @@ view model =
                             , placeholder "Add new concept"
                             , onInput SetNewConceptName
                             , value model.newConceptName
-                            , onEnter (AddConcept model.newConceptName)
+                            , onEnter (ProjectMsg (Project.AddConcept model.newConceptName))
                             ]
                             []
                         ]
@@ -485,46 +531,3 @@ subscriptions model =
         Store.loadProject SetLoadedProject
             :: mouseSubs
             |> Sub.batch
-
-
-
--- Encoders
-
-
-encodeProject : Model -> Encode.Value
-encodeProject model =
-    let
-        concepts =
-            model.concepts
-                |> Dict.toList
-                |> List.map (\( id, concept ) -> Concept.encode concept)
-    in
-        Encode.object
-            [ ( "name", Encode.string model.projectTitle )
-            , ( "concepts", Encode.list concepts )
-            ]
-
-
-
--- Decoders
-
-
-decodeModel : Decoder Model
-decodeModel =
-    Decode.decode Model
-        |> Decode.required "name" Decode.string
-        |> Decode.hardcoded ""
-        |> Decode.required "concepts" decodeConcepts
-        |> Decode.hardcoded None
-        |> Decode.hardcoded 1
-
-
-decodeConcepts : Decoder (Dict Int Concept)
-decodeConcepts =
-    Decode.list Concept.decode
-        |> Decode.map
-            (\list ->
-                list
-                    |> List.map (\c -> ( c.id, c ))
-                    |> Dict.fromList
-            )

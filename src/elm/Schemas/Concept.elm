@@ -98,6 +98,7 @@ type Msg
     | RemoveField Int
     | ToggleReorder
     | MoveField Int Int
+    | UpdatePosition Float ( Position, Position )
 
 
 
@@ -173,6 +174,18 @@ update msg concept =
 
         MoveField index offset ->
             { concept | fields = moveItem index offset concept.fields }
+
+        UpdatePosition scale ( start, current ) ->
+            let
+                position =
+                    concept.position
+
+                nextPosition =
+                    { x = position.x + round ((toFloat (current.x - start.x)) / scale)
+                    , y = position.y + round ((toFloat (current.y - start.y)) / scale)
+                    }
+            in
+                { concept | position = nextPosition }
 
 
 
