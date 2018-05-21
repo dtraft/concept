@@ -132,16 +132,19 @@ encode project =
                 |> Dict.toList
                 |> List.map (\( id, concept ) -> Concept.encode concept)
 
+        projectId =
+            case project.id of
+                Just projectId ->
+                    Encode.string projectId
+
+                Nothing ->
+                    Encode.null
+
         fields =
-            [ ( "name", Encode.string project.title )
+            [ ( "id", projectId )
+            , ( "name", Encode.string project.title )
             , ( "concepts", Encode.list concepts )
             ]
-                ++ case project.id of
-                    Just projectId ->
-                        [ ( "id", Encode.string projectId ) ]
-
-                    Nothing ->
-                        []
     in
         Encode.object
             fields
