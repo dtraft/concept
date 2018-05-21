@@ -5,12 +5,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Events.Extra exposing (onEnter)
 import Http
-import Dict exposing (Dict)
 import Json.Decode exposing (succeed, Decoder, map, map2, field, int)
 import Mouse exposing (Position)
-import RemoteData exposing (WebData, RemoteData(..))
 import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Pipeline as Decode
 import Json.Encode as Encode
 
 
@@ -109,6 +106,7 @@ type alias Drag =
 
 type Msg
     = SetNewConceptName String
+    | CreateNewConcept String
     | DragMsg SubDragMsg
     | ReferenceMsg SubReferenceMsg
     | ProjectMsg Project.Msg
@@ -141,6 +139,13 @@ update msg model =
     case msg of
         SetNewConceptName name ->
             ( { model | newConceptName = name }, Cmd.none )
+
+        CreateNewConcept name ->
+            let
+                nextModel =
+                    { model | newConceptName = "" }
+            in
+                update (ProjectMsg (Project.AddConcept name)) nextModel
 
         ProjectMsg subMsg ->
             let
@@ -462,7 +467,7 @@ view model =
                             , placeholder "Add new concept"
                             , onInput SetNewConceptName
                             , value model.newConceptName
-                            , onEnter (ProjectMsg (Project.AddConcept model.newConceptName))
+                            , onEnter (CreateNewConcept model.newConceptName)
                             ]
                             []
                         ]
