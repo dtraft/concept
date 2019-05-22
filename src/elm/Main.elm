@@ -1,23 +1,21 @@
-module Main exposing (..)
+module Main exposing (Drag, Flags, Model, MouseInteraction(..), Msg(..), Status(..), SubDragMsg(..), SubReferenceMsg(..), dragUpdate, init, initTest, loadProject, main, onDragMouseDown, onReferenceMouseDown, onReferenceMouseUp, referenceUpdate, saveProject, subscriptions, update, view)
 
+-- Local Imports
+
+import Board
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Events.Extra exposing (onEnter)
 import Http
-import Json.Decode exposing (succeed, Decoder, map, map2, field, int)
-import Mouse exposing (Position)
-import Json.Decode as Decode exposing (Decoder)
+import Json.Decode as Decode exposing (Decoder, field, int, map, map2, succeed)
 import Json.Encode as Encode
-
-
--- Local Imports
-
-import Types exposing (Reference)
-import Schemas.Project as Project exposing (Project)
+import Mouse exposing (Position)
 import Schemas.Concept as Concept exposing (Concept)
-import Board
+import Schemas.Project as Project exposing (Project)
 import Store
+import Types exposing (Reference)
+
 
 
 -- APP
@@ -75,7 +73,7 @@ init flags =
             , status = nextStatus
             }
     in
-        ( nextModel, nextCmd )
+    ( nextModel, nextCmd )
 
 
 initTest : Flags -> ( Model, Cmd Msg )
@@ -84,7 +82,7 @@ initTest flags =
         ( model, cmd ) =
             init flags
     in
-        ( { model | project = Project.test1 }, cmd )
+    ( { model | project = Project.test1 }, cmd )
 
 
 type MouseInteraction
@@ -145,20 +143,20 @@ update msg model =
                 nextModel =
                     { model | newConceptName = "" }
             in
-                update (ProjectMsg (Project.AddConcept name)) nextModel
+            update (ProjectMsg (Project.AddConcept name)) nextModel
 
         ProjectMsg subMsg ->
             let
                 nextProject =
                     Project.update subMsg model.project
             in
-                ( { model | project = nextProject }, Cmd.none )
+            ( { model | project = nextProject }, Cmd.none )
 
         DragMsg subMsg ->
-            ( (dragUpdate subMsg model), Cmd.none )
+            ( dragUpdate subMsg model, Cmd.none )
 
         ReferenceMsg subMsg ->
-            ( (referenceUpdate subMsg model), Cmd.none )
+            ( referenceUpdate subMsg model, Cmd.none )
 
         SaveProject ->
             ( { model | status = Saving }, saveProject model.project )
@@ -177,23 +175,23 @@ update msg model =
                                         Nothing ->
                                             Cmd.none
                             in
-                                ( { model | project = nextProject }, nextCmd )
+                            ( { model | project = nextProject }, nextCmd )
 
                         Err error ->
                             let
                                 nextError =
                                     Debug.log "Save error: " error
                             in
-                                ( model, Cmd.none )
+                            ( model, Cmd.none )
             in
-                ( { nextModel | status = Loaded }, nextCmds )
+            ( { nextModel | status = Loaded }, nextCmds )
 
         LoadProjectResponse result ->
             let
                 ( nextModel, _ ) =
                     update (SaveProjectResponse result) model
             in
-                ( nextModel, Cmd.none )
+            ( nextModel, Cmd.none )
 
         DownloadProject ->
             ( model, Store.download (Project.encode model.project) )
@@ -213,9 +211,9 @@ update msg model =
                                 test =
                                     Debug.log "error: " error
                             in
-                                model
+                            model
             in
-                ( nextModel, Cmd.none )
+            ( nextModel, Cmd.none )
 
         LoadFile ->
             ( model, Store.loadFile () )
@@ -225,20 +223,22 @@ update msg model =
                 nextScale =
                     if model.scale < 1 then
                         model.scale + 0.1
+
                     else
                         model.scale
             in
-                ( { model | scale = nextScale }, Cmd.none )
+            ( { model | scale = nextScale }, Cmd.none )
 
         ScaleDown ->
             let
                 nextScale =
                     if model.scale > 0.5 then
                         model.scale - 0.1
+
                     else
                         model.scale
             in
-                ( { model | scale = nextScale }, Cmd.none )
+            ( { model | scale = nextScale }, Cmd.none )
 
 
 referenceUpdate : SubReferenceMsg -> Model -> Model
@@ -252,12 +252,12 @@ referenceUpdate msg ({ mouseInteraction, project, scale } as model) =
                 nextReference =
                     { reference
                         | position =
-                            { x = round ((toFloat position.x) / scale - 1)
-                            , y = round ((toFloat position.y) / scale - 1)
+                            { x = round (toFloat position.x / scale - 1)
+                            , y = round (toFloat position.y / scale - 1)
                             }
                     }
             in
-                { model | mouseInteraction = ReferenceInteraction nextReference }
+            { model | mouseInteraction = ReferenceInteraction nextReference }
 
         MouseAt position ->
             case mouseInteraction of
@@ -266,12 +266,12 @@ referenceUpdate msg ({ mouseInteraction, project, scale } as model) =
                         nextReference =
                             { reference
                                 | position =
-                                    { x = round ((toFloat (position.x - 1)) / scale)
-                                    , y = round ((toFloat (position.y - 1)) / scale - (((1 - scale) * 112) / scale))
+                                    { x = round (toFloat (position.x - 1) / scale)
+                                    , y = round (toFloat (position.y - 1) / scale - (((1 - scale) * 112) / scale))
                                     }
                             }
                     in
-                        { model | mouseInteraction = ReferenceInteraction nextReference }
+                    { model | mouseInteraction = ReferenceInteraction nextReference }
 
                 _ ->
                     model
@@ -288,7 +288,7 @@ referenceUpdate msg ({ mouseInteraction, project, scale } as model) =
                         ( nextModel, cmd ) =
                             update msg model
                     in
-                        nextModel
+                    nextModel
 
                 _ ->
                     model
@@ -313,7 +313,7 @@ dragUpdate msg ({ project } as model) =
                 ( nextModel, _ ) =
                     update nextMsg model
             in
-                { nextModel | mouseInteraction = DragInteraction nextDrag }
+            { nextModel | mouseInteraction = DragInteraction nextDrag }
 
         DragAt xy ->
             case model.mouseInteraction of
@@ -330,7 +330,7 @@ dragUpdate msg ({ project } as model) =
                         ( nextModel, _ ) =
                             update nextMsg model
                     in
-                        { nextModel | mouseInteraction = DragInteraction nextDrag }
+                    { nextModel | mouseInteraction = DragInteraction nextDrag }
 
                 _ ->
                     model
@@ -345,7 +345,17 @@ dragUpdate msg ({ project } as model) =
 
 loadProject : String -> Cmd Msg
 loadProject id_ =
-    Http.get ("https://api.jsonbin.io/b/" ++ id_ ++ "/latest") (Project.decodeLoad id_)
+    Http.request
+        { method = "GET"
+        , headers =
+            [ Http.header "secret-key" "$2a$10$q.RtK0tIE6qFDm09GfDpw.Ti4ul8DEpQGEaJLeKCe25SwTQjlVwTG"
+            ]
+        , url = "https://api.jsonbin.io/b/" ++ id_ ++ "/latest"
+        , body = Http.emptyBody
+        , expect = Http.expectJson (Project.decodeLoad id_)
+        , timeout = Nothing
+        , withCredentials = False
+        }
         |> Http.send LoadProjectResponse
 
 
@@ -357,22 +367,34 @@ saveProject project =
                 |> Project.encode
                 |> Http.jsonBody
     in
-        case project.id of
-            Just id_ ->
-                Http.request
-                    { method = "PUT"
-                    , headers = []
-                    , url = "https://api.jsonbin.io/b/" ++ id_
-                    , body = body
-                    , expect = Http.expectJson Project.decodeUpdate
-                    , timeout = Nothing
-                    , withCredentials = False
-                    }
-                    |> Http.send SaveProjectResponse
+    case project.id of
+        Just id_ ->
+            Http.request
+                { method = "PUT"
+                , headers =
+                    [ Http.header "secret-key" "$2a$10$q.RtK0tIE6qFDm09GfDpw.Ti4ul8DEpQGEaJLeKCe25SwTQjlVwTG"
+                    ]
+                , url = "https://api.jsonbin.io/b/" ++ id_
+                , body = body
+                , expect = Http.expectJson Project.decodeUpdate
+                , timeout = Nothing
+                , withCredentials = False
+                }
+                |> Http.send SaveProjectResponse
 
-            Nothing ->
-                Http.post "https://api.jsonbin.io/b" body Project.decodeResponse
-                    |> Http.send SaveProjectResponse
+        Nothing ->
+            Http.request
+                { method = "POST"
+                , headers =
+                    [ Http.header "secret-key" "$2a$10$q.RtK0tIE6qFDm09GfDpw.Ti4ul8DEpQGEaJLeKCe25SwTQjlVwTG"
+                    ]
+                , url = "https://api.jsonbin.io/b/"
+                , body = body
+                , expect = Http.expectJson Project.decodeResponse
+                , timeout = Nothing
+                , withCredentials = False
+                }
+                |> Http.send SaveProjectResponse
 
 
 
@@ -406,87 +428,89 @@ view model =
         saveText =
             if model.status == Saving then
                 "Saving..."
+
             else
                 "Save Project"
 
         loadingText =
             if model.status == Loading then
                 "Loading Project..."
+
             else
                 "Enter Project Title"
     in
-        div [ class "app-wrapper" ]
-            [ div [ class "header" ]
-                [ div [ class "header--left" ]
-                    [ h1
-                        []
-                        [ text "Concept" ]
-                    , div
-                        [ class "header--title" ]
-                        [ input
-                            [ id "project-title"
-                            , placeholder loadingText
-                            , onInput (ProjectMsg << Project.SetTitle)
-                            , value model.project.title
-                            ]
-                            []
+    div [ class "app-wrapper" ]
+        [ div [ class "header" ]
+            [ div [ class "header--left" ]
+                [ h1
+                    []
+                    [ text "Concept" ]
+                , div
+                    [ class "header--title" ]
+                    [ input
+                        [ id "project-title"
+                        , placeholder loadingText
+                        , onInput (ProjectMsg << Project.SetTitle)
+                        , value model.project.title
                         ]
+                        []
                     ]
-                , div [ class "header--right" ]
-                    [ div [ class "header--utility" ]
-                        [ button [ class "btn icon-btn ion-plus-round", type_ "button", onClick ScaleUp ]
+                ]
+            , div [ class "header--right" ]
+                [ div [ class "header--utility" ]
+                    [ button [ class "btn icon-btn ion-plus-round", type_ "button", onClick ScaleUp ]
+                        []
+                    , button [ class "btn icon-btn ion-minus-round", type_ "button", onClick ScaleDown ]
+                        []
+                    , div [ class "header--utility--menu" ]
+                        [ button [ class "btn icon-btn ion-navicon-round", type_ "button" ]
                             []
-                        , button [ class "btn icon-btn ion-minus-round", type_ "button", onClick ScaleDown ]
-                            []
-                        , div [ class "header--utility--menu" ]
-                            [ button [ class "btn icon-btn ion-navicon-round", type_ "button" ]
-                                []
-                            , div [ class "header--utility--menu--list--wrapper" ]
-                                [ ul [ class "header--utility--menu--list" ]
-                                    [ li [ onClick SaveProject ] [ text saveText ]
-                                    , li [ onClick DownloadProject ] [ text "Download" ]
-                                    , li [ class "file-input" ]
-                                        [ input
-                                            [ type_ "file"
-                                            , multiple False
-                                            , id "load-file"
-                                            , accept ".concept"
-                                            , on "change" (Decode.succeed LoadFile)
-                                            ]
-                                            []
-                                        , text "Load from File"
+                        , div [ class "header--utility--menu--list--wrapper" ]
+                            [ ul [ class "header--utility--menu--list" ]
+                                [ li [ onClick SaveProject ] [ text saveText ]
+                                , li [ onClick DownloadProject ] [ text "Download" ]
+                                , li [ class "file-input" ]
+                                    [ input
+                                        [ type_ "file"
+                                        , multiple False
+                                        , id "load-file"
+                                        , accept ".concept"
+                                        , on "change" (Decode.succeed LoadFile)
                                         ]
+                                        []
+                                    , text "Load from File"
                                     ]
                                 ]
                             ]
                         ]
-                    , div [ class "header--add-concept" ]
-                        [ input
-                            [ class "form-control"
-                            , id "new-concept"
-                            , placeholder "Add new concept"
-                            , onInput SetNewConceptName
-                            , value model.newConceptName
-                            , onEnter (CreateNewConcept model.newConceptName)
-                            ]
-                            []
+                    ]
+                , div [ class "header--add-concept" ]
+                    [ input
+                        [ class "form-control"
+                        , id "new-concept"
+                        , placeholder "Add new concept"
+                        , onInput SetNewConceptName
+                        , value model.newConceptName
+                        , onEnter (CreateNewConcept model.newConceptName)
                         ]
+                        []
                     ]
                 ]
-            , div
-                [ classList
-                    [ ( "board", True )
-                    , ( "create-reference", referenceSituation /= Nothing )
-                    ]
-                , style
-                    [ ( "transform", "scale(" ++ toString model.scale ++ ")" )
-                    , ( "transform-origin", "0 0" )
-                    , ( "min-width", (toString (100 / model.scale)) ++ "%" )
-                    , ( "min-height", "calc(" ++ toString (100 / model.scale) ++ "% - 112px)" )
-                    ]
-                ]
-                [ Board.view boardProps ]
             ]
+        , div
+            [ classList
+                [ ( "board", True )
+                , ( "create-reference", referenceSituation /= Nothing )
+                ]
+            , style
+                [ ( "transform", "scale(" ++ toString model.scale ++ ")" )
+                , ( "transform-origin", "0 0" )
+                , ( "min-width", toString (100 / model.scale) ++ "%" )
+                , ( "min-height", "calc(" ++ toString (100 / model.scale) ++ "% - 112px)" )
+                ]
+            ]
+            [ Board.view boardProps ]
+        ]
 
 
 onDragMouseDown : Int -> Attribute Msg
@@ -500,7 +524,7 @@ onDragMouseDown id =
 onReferenceMouseDown : Int -> Int -> Attribute Msg
 onReferenceMouseDown id fieldIndex =
     Mouse.position
-        |> Decode.map (ReferenceStart << (Reference id fieldIndex))
+        |> Decode.map (ReferenceStart << Reference id fieldIndex)
         |> Decode.map ReferenceMsg
         |> on "mousedown"
 
@@ -533,6 +557,6 @@ subscriptions model =
                     [ Mouse.moves MouseAt, Mouse.ups ReferenceEnd ]
                         |> List.map (Sub.map ReferenceMsg)
     in
-        Store.loadProject SetLoadedProject
-            :: mouseSubs
-            |> Sub.batch
+    Store.loadProject SetLoadedProject
+        :: mouseSubs
+        |> Sub.batch
